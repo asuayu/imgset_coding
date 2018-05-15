@@ -234,7 +234,7 @@ def encoder(img_folder, out_file, parameters):
       if isinstance(info, tuple):
         ex_pred_info.append(info)
 
-
+  new_pred_info = []
 
 
   #Compress the image one by one
@@ -259,20 +259,21 @@ def encoder(img_folder, out_file, parameters):
     #select 4(max_num_models) references freom ref_yuvs
     if len(ref_yuvs) > max_num_models:
       [new_refs, ref_index] = ref_select(img_info,ref_yuvs,cur_img, int_folder, max_num_models)
+      newref = []
       for index_p, p in enumerate(ex_pred_info):
         listp = list(p)
         if listp[1] == cur_img:
           num_model = listp[2]
           for i in range(num_model):
-            if i in ref_index:
-              ref_index.remove(i)
-            else:
-              listp[3][i] = None
-              listp[2]  -= 1
-          listp[3] = filter(None, listp[3])
-          ref_index = [index-num_model for index in ref_index]
-        ex_pred_info[index_p] = tuple(listp)
+            nowp = (listp[0], listp[1], 1, [listp[3][i]])
+            newref.append(nowp)
+      for i in ref_index:
+        new_pred_info.append((newref[i]))
       ref_yuvs = new_refs
+    else:
+      for p in ex_pred_info:
+        if p[1] == cur_img:
+          new_pred_info.append(p)
 
     # Convert this image into YUV with specific number of blank images (will be replaced by references during coding)
     (yuv_width, yuv_height, yuv_format) = img2yuv(img_info, '%s%d.yuv' % (int_folder, cur_img), True, len(ref_yuvs))
@@ -301,7 +302,7 @@ def encoder(img_folder, out_file, parameters):
   # Write extend prediction information to use
   with open('ex_pred.info', 'wt') as ex_pred_file:
     ex_pred_file.write('%s\n' % str(model_size))
-    for each_pred in ex_pred_info:
+    for each_pred in new_pred_info:
       if each_pred[2]:
         ex_pred_file.write('%s %s %s ' % (str(each_pred[0]), str(each_pred[1]), str(each_pred[2])))
       for i in each_pred[3]:
@@ -324,4 +325,4 @@ def encoder(img_folder, out_file, parameters):
 
 
 if __name__ == '__main__':
-  encoder('inputimgs', 'imgset.bin', {'AllIntra' : False, 'AddPath' : 'dlls', 'MaxNumModels' : 4, 'PhotometricDOF' : 2, 'QPI' : 25, 'QPB' : 30})
+  encoder('inputimgs', 'imgset.bin', {'AllIntra' : False, 'AddPath' : 'dlls', 'MaxNumModels' : 4, 'PhotometricDOF' : 2, 'QPI' : 30, 'QPB' : 34})
