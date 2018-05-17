@@ -15,7 +15,6 @@ import skimage.transform
 
 import codec
 
-import heapq
 
 def extend(img, grid = 8, x_ext = True, y_ext = True):
   grid = float(grid)
@@ -100,19 +99,20 @@ def ref_select(img_info, ref_yuvs, cur_img, int_folder, max_num_models):
   diff_info = codec.loadDiffInfo(diff_file)
   print('Reference: %s'%ref_yuvs)
   print('Weight : %s'%diff_info)
-  slist = heapq.nlargest(max_num_models, diff_info)
+
   # for index, text in enumerate(diff_info):
   #   if text in slist:
   #     new_refs.append(ref_yuvs[index])
   #     ref_index.append(index)
-  for i in slist:
-    for index, j in enumerate(diff_info):
-      if j == i:
-        new_refs.append(ref_yuvs[index])
-        ref_index.append(index)
+  x = numpy.array(diff_info)
+  sort_index = numpy.argsort(-x)
 
-  new_refs.reverse()
-  ref_index.reverse()
+  for i in range(max_num_models):
+    ref_index.append(i)
+    new_refs.append(ref_yuvs[i])
+
+  # new_refs.reverse()
+  # ref_index.reverse()
   print('Ref index: %s'%ref_index)
   print('New refereces: %s ' % new_refs)
   return [new_refs, ref_index]
@@ -325,4 +325,4 @@ def encoder(img_folder, out_file, parameters):
 
 
 if __name__ == '__main__':
-  encoder('inputimgs', 'imgset.bin', {'AllIntra' : False, 'AddPath' : 'dlls', 'MaxNumModels' : 4, 'PhotometricDOF' : 2, 'QPI' : 30, 'QPB' : 34})
+  encoder('inputimgs', 'imgset.bin', {'AllIntra' : False, 'AddPath' : 'dlls', 'MaxNumModels' : 4, 'PhotometricDOF' : 2, 'QPI' : 35, 'QPB' : 39})
